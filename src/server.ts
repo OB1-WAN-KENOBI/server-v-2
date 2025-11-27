@@ -16,7 +16,9 @@ app.use(helmet());
 // CORS настройки
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin:
+      process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === "production" ? false : "*"),
     credentials: true,
   })
 );

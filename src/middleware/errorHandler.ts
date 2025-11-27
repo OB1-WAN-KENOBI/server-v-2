@@ -6,11 +6,17 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("Error:", err.message);
-  console.error("Stack:", err.stack);
-
-  // Не показываем детали ошибки в продакшене
+  // Не логируем полный stack в продакшене
   const isDevelopment = process.env.NODE_ENV !== "production";
+
+  if (isDevelopment) {
+    console.error("Error:", err.message);
+    console.error("Stack:", err.stack);
+  } else {
+    // В продакшене логируем только общую информацию
+    console.error("Error occurred:", err.constructor.name);
+    // Не логируем message и stack, чтобы не раскрыть чувствительную информацию
+  }
 
   res.status(500).json({
     error: isDevelopment ? err.message : "Internal server error",
