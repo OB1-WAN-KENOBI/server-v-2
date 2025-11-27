@@ -54,7 +54,45 @@ router.patch("/:id", (req: Request, res: Response) => {
     if (index === -1) {
       return res.status(404).json({ error: "Project not found" });
     }
-    projects[index] = { ...projects[index], ...req.body, id: req.params.id };
+
+    const currentProject = projects[index];
+    const updates = req.body;
+
+    // Обрабатываем title: если пришла строка, сохраняем структуру { ru, en }
+    if (updates.title !== undefined) {
+      if (typeof updates.title === "string") {
+        // Если текущий title - объект, обновляем оба языка
+        if (
+          typeof currentProject.title === "object" &&
+          currentProject.title !== null
+        ) {
+          updates.title = {
+            ru: updates.title,
+            en: updates.title,
+          };
+        }
+        // Если текущий title - строка, оставляем строку
+      }
+    }
+
+    // Обрабатываем description: если пришла строка, сохраняем структуру { ru, en }
+    if (updates.description !== undefined) {
+      if (typeof updates.description === "string") {
+        // Если текущий description - объект, обновляем оба языка
+        if (
+          typeof currentProject.description === "object" &&
+          currentProject.description !== null
+        ) {
+          updates.description = {
+            ru: updates.description,
+            en: updates.description,
+          };
+        }
+        // Если текущий description - строка, оставляем строку
+      }
+    }
+
+    projects[index] = { ...currentProject, ...updates, id: req.params.id };
     writeJsonFile(DATA_FILE, projects);
     res.json(projects[index]);
   } catch (error) {
