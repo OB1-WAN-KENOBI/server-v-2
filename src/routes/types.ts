@@ -23,3 +23,18 @@ export interface ApiSkill {
   category: ApiSkillCategory;
   level: ApiSkillLevel;
 }
+
+export interface ApiProfile {
+  name: string;
+  role: LocalizedString;
+  description: LocalizedString;
+  aboutTexts: {
+    ru: string[];
+    en: string[];
+  };
+  socials?: {
+    github?: string;
+    linkedin?: string;
+    telegram?: string;
+  };
+}

@@ -1,0 +1,28 @@
+{
+  "name": "John Doe",
+  "role": {
+    "ru": "Full Stack Разработчик",
+    "en": "Full Stack Developer"
+  },
+  "description": {
+    "ru": "Увлеченный разработчик, создающий современные веб-приложения с React, TypeScript и Node.js. Сосредоточен на чистом коде и пользовательском опыте.",
+    "en": "Passionate developer creating modern web applications with React, TypeScript, and Node.js. Focused on clean code and user experience."
+  },
+  "aboutTexts": {
+    "ru": [
+      "Я увлеченный Frontend разработчик с более чем 5-летним опытом создания веб-приложений. Мой путь в разработке программного обеспечения начался с любопытства о том, как работают веб-сайты, и превратился в карьеру, сосредоточенную на создании значимых цифровых впечатлений.",
+      "Я специализируюсь на современных JavaScript фреймворках, особенно React и TypeScript, и всегда изучаю новые технологии и лучшие практики. Я верю в написание чистого, поддерживаемого кода и в важность пользовательского дизайна.",
+      "Когда я не программирую, мне нравится вносить вклад в проекты с открытым исходным кодом, писать технические статьи и наставлять младших разработчиков. Я всегда рад принять новые вызовы и работать над проектами, которые имеют значение."
+    ],
+    "en": [
+      "I'm a passionate Frontend developer with over 5 years of experience building web applications. My journey in software development started with a curiosity about how websites work, and it has evolved into a career focused on creating meaningful digital experiences.",
+      "I specialize in modern JavaScript frameworks, particularly React and TypeScript, and I'm always exploring new technologies and best practices. I believe in writing clean, maintainable code and in the importance of user-centered design.",
+      "When I'm not coding, I enjoy contributing to open-source projects, writing technical articles, and mentoring junior developers. I'm always excited to take on new challenges and work on projects that make a difference."
+    ]
+  },
+  "socials": {
+    "github": "",
+    "linkedin": "",
+    "telegram": ""
+  }
+}
