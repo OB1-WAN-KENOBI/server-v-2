@@ -1,0 +1,99 @@
+[
+  {
+    "id": "1",
+    "title": {
+      "ru": "E-Commerce Платформа",
+      "en": "E-Commerce Platform"
+    },
+    "description": {
+      "ru": "Полнофункциональное e-commerce решение, построенное на React и Node.js. Включает аутентификацию пользователей, обработку платежей и админ-панель. Платформа поддерживает несколько способов оплаты, управление инвентарем и отслеживание заказов в реальном времени.",
+      "en": "A full-stack e-commerce solution built with React and Node.js. Features include user authentication, payment processing, and admin dashboard. The platform supports multiple payment methods, inventory management, and real-time order tracking."
+    },
+    "techStack": [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Stripe"
+    ],
+    "year": 2024,
+    "status": "Completed",
+    "url": "https://github.com/example/ecommerce-platform"
+  },
+  {
+    "id": "2",
+    "title": {
+      "ru": "Приложение для Управления Задачами",
+      "en": "Task Management App"
+    },
+    "description": {
+      "ru": "Коллаборативное приложение для управления задачами с обновлениями в реальном времени. Построено с использованием React, TypeScript и WebSocket для живой синхронизации. Включает командное сотрудничество, назначение задач, дедлайны и отслеживание прогресса.",
+      "en": "A collaborative task management application with real-time updates. Built using React, TypeScript, and WebSocket for live synchronization. Features include team collaboration, task assignments, deadlines, and progress tracking."
+    },
+    "techStack": ["React", "TypeScript", "WebSocket", "Node.js", "PostgreSQL"],
+    "year": 2023,
+    "status": "Completed",
+    "url": "https://github.com/example/task-manager"
+  },
+  {
+    "id": "3",
+    "title": {
+      "ru": "Погодная Панель",
+      "en": "Weather Dashboard"
+    },
+    "description": {
+      "ru": "Адаптивная погодная панель, отображающая текущие условия и прогнозы. Интегрируется с несколькими погодными API и включает интерактивные карты. Пользователи могут просматривать детальные прогнозы, погодные предупреждения и исторические данные.",
+      "en": "A responsive weather dashboard that displays current conditions and forecasts. Integrates with multiple weather APIs and features interactive maps. Users can view detailed forecasts, weather alerts, and historical data."
+    },
+    "techStack": ["React", "JavaScript", "Chart.js", "OpenWeather API"],
+    "year": 2023,
+    "status": "Completed",
+    "url": "https://github.com/example/weather-dashboard"
+  },
+  {
+    "id": "4",
+    "title": {
+      "ru": "Аналитика Социальных Сетей",
+      "en": "Social Media Analytics"
+    },
+    "description": {
+      "ru": "Платформа аналитики для метрик социальных сетей. Предоставляет инсайты, графики и отчеты для отслеживания вовлеченности и производительности. Включает визуализацию данных, функциональность экспорта и генерацию пользовательских отчетов.",
+      "en": "Analytics platform for social media metrics. Provides insights, charts, and reports for tracking engagement and performance. Features include data visualization, export functionality, and custom report generation."
+    },
+    "techStack": ["React", "TypeScript", "D3.js", "Node.js", "Redis"],
+    "year": 2024,
+    "status": "In Progress",
+    "url": "https://github.com/example/social-analytics"
+  },
+  {
+    "id": "5",
+    "title": {
+      "ru": "Система Управления Обучением",
+      "en": "Learning Management System"
+    },
+    "description": {
+      "ru": "Образовательная платформа для онлайн-курсов. Включает видеотрансляции, викторины, отслеживание прогресса и генерацию сертификатов. Поддерживает нескольких инструкторов, зачисление студентов и комплексную аналитику.",
+      "en": "Educational platform for online courses. Includes video streaming, quizzes, progress tracking, and certificate generation. Features support for multiple instructors, student enrollment, and comprehensive analytics."
+    },
+    "techStack": ["React", "TypeScript", "Node.js", "PostgreSQL", "AWS S3"],
+    "year": 2024,
+    "status": "Completed",
+    "url": "https://github.com/example/lms-platform"
+  },
+  {
+    "id": "6",
+    "title": {
+      "ru": "Портфолио Сайт",
+      "en": "Portfolio Website"
+    },
+    "description": {
+      "ru": "Современный адаптивный сайт-портфолио с анимациями и интерактивными элементами. Построен с использованием React, TypeScript и Vite. Включает секции проектов, навыков, контактов и админ-панель для управления контентом.",
+      "en": "Modern responsive portfolio website with animations and interactive elements. Built with React, TypeScript, and Vite. Features project sections, skills showcase, contact form, and admin panel for content management."
+    },
+    "techStack": ["React", "TypeScript", "Vite", "SCSS", "React Router"],
+    "year": 2024,
+    "status": "Completed",
+    "url": "https://github.com/example/portfolio"
+  }
+]
