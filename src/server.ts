@@ -14,11 +14,31 @@ const app = express();
 app.use(helmet());
 
 // CORS настройки
+// Поддерживаем несколько доменов через запятую или один домен
+// Например: "http://localhost:5173,https://your-domain.com"
+const getCorsOrigin = (): string | string[] | boolean => {
+  const frontendUrl = process.env.FRONTEND_URL;
+
+  if (!frontendUrl) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "WARNING: FRONTEND_URL is not set in production. CORS allows all origins."
+      );
+    }
+    return "*";
+  }
+
+  // Если несколько доменов через запятую
+  if (frontendUrl.includes(",")) {
+    return frontendUrl.split(",").map((url) => url.trim());
+  }
+
+  return frontendUrl;
+};
+
 app.use(
   cors({
-    origin:
-      process.env.FRONTEND_URL ||
-      (process.env.NODE_ENV === "production" ? false : "*"),
+    origin: getCorsOrigin(),
     credentials: true,
   })
 );
