@@ -1,26 +1,146 @@
 [
-  "React",
-  "TypeScript",
-  "JavaScript",
-  "Node.js",
-  "Express",
-  "PostgreSQL",
-  "MongoDB",
-  "HTML",
-  "CSS",
-  "SCSS",
-  "Vue.js",
-  "Git",
-  "Docker",
-  "Webpack",
-  "Vite",
-  "Jest",
-  "REST API",
-  "WebSocket",
-  "GraphQL",
-  "AWS",
-  "Redis",
-  "Figma",
-  "Agile",
-  "CI/CD"
+  {
+    "id": "skill-1",
+    "name": "React",
+    "category": "frontend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-2",
+    "name": "TypeScript",
+    "category": "frontend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-3",
+    "name": "JavaScript",
+    "category": "frontend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-4",
+    "name": "Node.js",
+    "category": "backend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-5",
+    "name": "Express",
+    "category": "backend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-6",
+    "name": "PostgreSQL",
+    "category": "backend",
+    "level": "middle"
+  },
+  {
+    "id": "skill-7",
+    "name": "MongoDB",
+    "category": "backend",
+    "level": "middle"
+  },
+  {
+    "id": "skill-8",
+    "name": "HTML",
+    "category": "frontend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-9",
+    "name": "CSS",
+    "category": "frontend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-10",
+    "name": "SCSS",
+    "category": "frontend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-11",
+    "name": "Vue.js",
+    "category": "frontend",
+    "level": "middle"
+  },
+  {
+    "id": "skill-12",
+    "name": "Git",
+    "category": "tooling",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-13",
+    "name": "Docker",
+    "category": "tooling",
+    "level": "middle"
+  },
+  {
+    "id": "skill-14",
+    "name": "Webpack",
+    "category": "tooling",
+    "level": "middle"
+  },
+  {
+    "id": "skill-15",
+    "name": "Vite",
+    "category": "tooling",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-16",
+    "name": "Jest",
+    "category": "tooling",
+    "level": "middle"
+  },
+  {
+    "id": "skill-17",
+    "name": "REST API",
+    "category": "backend",
+    "level": "advanced"
+  },
+  {
+    "id": "skill-18",
+    "name": "WebSocket",
+    "category": "backend",
+    "level": "middle"
+  },
+  {
+    "id": "skill-19",
+    "name": "GraphQL",
+    "category": "backend",
+    "level": "middle"
+  },
+  {
+    "id": "skill-20",
+    "name": "AWS",
+    "category": "tooling",
+    "level": "middle"
+  },
+  {
+    "id": "skill-21",
+    "name": "Redis",
+    "category": "backend",
+    "level": "middle"
+  },
+  {
+    "id": "skill-22",
+    "name": "Figma",
+    "category": "tooling",
+    "level": "middle"
+  },
+  {
+    "id": "skill-23",
+    "name": "Agile",
+    "category": "other",
+    "level": "middle"
+  },
+  {
+    "id": "skill-24",
+    "name": "CI/CD",
+    "category": "tooling",
+    "level": "middle"
+  }
 ]
