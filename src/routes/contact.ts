@@ -1,14 +1,9 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 
 const router = Router();
 
-router.post("/", (req, res) => {
+router.post("/", (req: Request, res: Response) => {
   const { name, email, message } = req.body;
-
-  if (!name || !email || !message) {
-    return res.status(400).json({ error: "Invalid payload" });
-  }
-
   res.json({ status: "ok" });
 });
 

@@ -1,9 +1,9 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import projects from "../data/projects.json";
 
 const router = Router();
 
-router.get("/", (_req, res) => {
+router.get("/", (req: Request, res: Response) => {
   res.json(projects);
 });
 
