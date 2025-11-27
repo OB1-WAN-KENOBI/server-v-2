@@ -1,10 +1,80 @@
 import { Router, Request, Response } from "express";
-import projects from "../data/projects.json";
+import { readJsonFile, writeJsonFile } from "../utils/fileStorage";
+import type { ApiProject } from "./types";
+
+const DATA_FILE = "src/data/projects.json";
 
 const router = Router();
 
+// GET /api/projects - получить все проекты
 router.get("/", (req: Request, res: Response) => {
-  res.json(projects);
+  try {
+    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to read projects" });
+  }
+});
+
+// GET /api/projects/:id - получить проект по ID
+router.get("/:id", (req: Request, res: Response) => {
+  try {
+    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
+    const project = projects.find((p) => p.id === req.params.id);
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to read project" });
+  }
+});
+
+// POST /api/projects - создать новый проект
+router.post("/", (req: Request, res: Response) => {
+  try {
+    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
+    const newProject: ApiProject = {
+      ...req.body,
+      id: Date.now().toString(),
+    };
+    projects.push(newProject);
+    writeJsonFile(DATA_FILE, projects);
+    res.status(201).json(newProject);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create project" });
+  }
+});
+
+// PATCH /api/projects/:id - обновить проект
+router.patch("/:id", (req: Request, res: Response) => {
+  try {
+    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
+    const index = projects.findIndex((p) => p.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+    projects[index] = { ...projects[index], ...req.body, id: req.params.id };
+    writeJsonFile(DATA_FILE, projects);
+    res.json(projects[index]);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update project" });
+  }
+});
+
+// DELETE /api/projects/:id - удалить проект
+router.delete("/:id", (req: Request, res: Response) => {
+  try {
+    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
+    const filtered = projects.filter((p) => p.id !== req.params.id);
+    if (filtered.length === projects.length) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+    writeJsonFile(DATA_FILE, filtered);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete project" });
+  }
 });
 
 export default router;
