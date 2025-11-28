@@ -32,6 +32,7 @@ router.patch(
         name: "",
         role: { ru: "", en: "" },
         description: { ru: "", en: "" },
+        photoUrl: "",
         aboutTexts: { ru: [], en: [] },
       };
 

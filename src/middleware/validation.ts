@@ -137,6 +137,13 @@ export const validateProfile = (
     }
   }
 
+  if (profile.photoUrl !== undefined) {
+    if (typeof profile.photoUrl !== "string") {
+      return res.status(400).json({ error: "photoUrl must be a string" });
+    }
+    profile.photoUrl = profile.photoUrl.trim().slice(0, 500);
+  }
+
   // Sanitization социальных сетей
   if (profile.socials) {
     if (profile.socials.github) {

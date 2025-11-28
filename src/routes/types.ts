@@ -36,6 +36,7 @@ export interface ApiProfile {
   name: string;
   role: LocalizedString;
   description: LocalizedString;
+  photoUrl?: string;
   aboutTexts: {
     ru: string[];
     en: string[];
