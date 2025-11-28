@@ -28,10 +28,13 @@ router.patch(
   validateProfile,
   async (req: Request, res: Response) => {
     try {
-      const currentProfile = await profileRepository.get();
-      if (!currentProfile) {
-        return res.status(404).json({ error: "Profile not found" });
-      }
+      const currentProfile = (await profileRepository.get()) || {
+        name: "",
+        role: { ru: "", en: "" },
+        description: { ru: "", en: "" },
+        aboutTexts: { ru: [], en: [] },
+      };
+
       const updatedProfile: ApiProfile = {
         ...currentProfile,
         ...req.body,
