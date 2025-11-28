@@ -23,6 +23,12 @@ app.use(cookieParser());
 // CORS настройки
 // Поддерживаем несколько доменов через запятую или один домен
 // Например: "http://localhost:5173,https://your-domain.com"
+const normalizeOrigin = (origin: string): string => {
+  const trimmed = origin.trim();
+  // убираем завершающий слэш, чтобы не было рассинхрона с Origin заголовком
+  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
+};
+
 const getCorsOrigin = (): string | string[] | boolean => {
   const frontendUrl = process.env.FRONTEND_URL;
 
@@ -37,10 +43,10 @@ const getCorsOrigin = (): string | string[] | boolean => {
 
   // Если несколько доменов через запятую
   if (frontendUrl.includes(",")) {
-    return frontendUrl.split(",").map((url) => url.trim());
+    return frontendUrl.split(",").map((url) => normalizeOrigin(url));
   }
 
-  return frontendUrl;
+  return normalizeOrigin(frontendUrl);
 };
 
 app.use(
