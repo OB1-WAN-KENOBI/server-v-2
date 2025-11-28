@@ -5,6 +5,7 @@ import projectsRouter from "./routes/projects";
 import skillsRouter from "./routes/skills";
 import contactRouter from "./routes/contact";
 import profileRouter from "./routes/profile";
+import adminRouter from "./routes/admin";
 import { apiRateLimit } from "./middleware/rateLimit";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 
@@ -58,6 +59,7 @@ app.use("/api/projects", projectsRouter);
 app.use("/api/skills", skillsRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/profile", profileRouter);
+app.use("/api/admin", adminRouter);
 
 // Обработка ошибок
 app.use(notFoundHandler);
