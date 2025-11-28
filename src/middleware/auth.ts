@@ -28,6 +28,15 @@ export const issueAuthToken = (email: string): string => {
   );
 };
 
+export type AuthenticatedRequest = Request & {
+  user?: {
+    id?: string;
+    name?: string;
+    email: string;
+    role: "admin";
+  };
+};
+
 export const requireAuth = (
   req: Request,
   res: Response,
@@ -49,11 +58,24 @@ export const requireAuth = (
 
   // Сначала пробуем JWT
   try {
-    jwt.verify(token, JWT_SECRET as string) as JwtPayload;
+    const payload = jwt.verify(token, JWT_SECRET as string) as JwtPayload;
+    (req as AuthenticatedRequest).user = {
+      id: payload.email,
+      name: payload.email,
+      email: payload.email,
+      role: "admin",
+    };
     return next();
   } catch (err) {
     // Fallback на старый статичный токен, чтобы не ломать существующих клиентов
     if (ADMIN_TOKEN && token === ADMIN_TOKEN) {
+      const fallbackEmail = process.env.ADMIN_EMAIL || "admin";
+      (req as AuthenticatedRequest).user = {
+        id: fallbackEmail,
+        name: fallbackEmail,
+        email: fallbackEmail,
+        role: "admin",
+      };
       return next();
     }
     return res.status(403).json({ error: "Invalid token" });

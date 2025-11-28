@@ -24,6 +24,14 @@ export interface ApiSkill {
   level: ApiSkillLevel;
 }
 
+export interface ApiStatus {
+  status: "Available" | "Busy" | "Not taking projects";
+  message?: {
+    ru?: string;
+    en?: string;
+  };
+}
+
 export interface ApiProfile {
   name: string;
   role: LocalizedString;

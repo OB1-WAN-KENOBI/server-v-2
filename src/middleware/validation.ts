@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import type { ApiProject, ApiSkill, ApiProfile } from "../routes/types";
+import type { ApiProject, ApiSkill, ApiProfile, ApiStatus } from "../routes/types";
 
 // Валидация проекта
 export const validateProject = (
@@ -191,6 +191,39 @@ export const validateContact = (
   req.body.name = name.trim().slice(0, 100);
   req.body.email = email.trim().slice(0, 200);
   req.body.message = message.trim().slice(0, 2000);
+
+  next();
+};
+
+export const validateStatus = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const status = req.body as Partial<ApiStatus>;
+
+  const allowedStatuses: ApiStatus["status"][] = [
+    "Available",
+    "Busy",
+    "Not taking projects",
+  ];
+
+  if (!status.status || !allowedStatuses.includes(status.status)) {
+    return res.status(400).json({ error: "Invalid status value" });
+  }
+
+  if (status.message !== undefined) {
+    if (typeof status.message === "object" && status.message !== null) {
+      const { ru, en } = status.message;
+      if ((ru && typeof ru !== "string") || (en && typeof en !== "string")) {
+        return res
+          .status(400)
+          .json({ error: "Message must be strings for ru/en" });
+      }
+    } else {
+      return res.status(400).json({ error: "Message must be an object" });
+    }
+  }
 
   next();
 };

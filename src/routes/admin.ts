@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { requireAuth, issueAuthToken } from "../middleware/auth";
+import { requireAuth, issueAuthToken, AuthenticatedRequest } from "../middleware/auth";
 import { adminRateLimit, loginRateLimit } from "../middleware/rateLimit";
 
 const router = Router();
@@ -53,7 +53,15 @@ router.post(
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
     });
 
-    res.json({ status: "ok" });
+    res.json({
+      status: "ok",
+      user: {
+        id: email,
+        name: email,
+        email,
+        role: "admin" as const,
+      },
+    });
   }
 );
 
@@ -67,8 +75,21 @@ router.post("/logout", requireAuth, (req: Request, res: Response): void => {
 });
 
 // Лёгкий healthcheck для проверки админского токена без побочных эффектов
-router.get("/ping", adminRateLimit, requireAuth, (req: Request, res: Response) => {
-  res.json({ status: "ok" });
-});
+router.get(
+  "/ping",
+  adminRateLimit,
+  requireAuth,
+  (req: AuthenticatedRequest, res: Response) => {
+    res.json({
+      status: "ok",
+      user: req.user || {
+        id: "admin",
+        name: "Admin",
+        email: process.env.ADMIN_EMAIL || "admin",
+        role: "admin",
+      },
+    });
+  }
+);
 
 export default router;
