@@ -141,7 +141,17 @@ export const validateProfile = (
     if (typeof profile.photoUrl !== "string") {
       return res.status(400).json({ error: "photoUrl must be a string" });
     }
-    profile.photoUrl = profile.photoUrl.trim().slice(0, 500);
+    profile.photoUrl = profile.photoUrl.trim().slice(0, 2048);
+  }
+
+  if (profile.photoData !== undefined) {
+    if (typeof profile.photoData !== "string") {
+      return res.status(400).json({ error: "photoData must be a base64 string" });
+    }
+    // Простая проверка объема: ограничим до ~10MB строки
+    if (profile.photoData.length > 10 * 1024 * 1024) {
+      return res.status(400).json({ error: "photoData is too large" });
+    }
   }
 
   // Sanitization социальных сетей

@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import path from "path";
+import fs from "fs";
 import projectsRouter from "./routes/projects";
 import skillsRouter from "./routes/skills";
 import contactRouter from "./routes/contact";
@@ -62,6 +64,13 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Rate limiting для всего API
 app.use("/api", apiRateLimit);
+
+// Раздача загруженных файлов
+const uploadsDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use("/uploads", express.static(uploadsDir));
 
 // Роуты
 app.use("/api/projects", projectsRouter);
