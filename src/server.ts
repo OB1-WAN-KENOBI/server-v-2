@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import projectsRouter from "./routes/projects";
 import skillsRouter from "./routes/skills";
 import contactRouter from "./routes/contact";
@@ -16,6 +17,7 @@ app.set("trust proxy", true);
 
 // Security headers
 app.use(helmet());
+app.use(cookieParser());
 
 // CORS настройки
 // Поддерживаем несколько доменов через запятую или один домен

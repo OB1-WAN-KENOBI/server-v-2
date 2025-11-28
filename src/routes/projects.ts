@@ -1,18 +1,16 @@
 import { Router, Request, Response } from "express";
-import { readJsonFile, writeJsonFile } from "../utils/fileStorage";
 import type { ApiProject } from "./types";
 import { validateProject } from "../middleware/validation";
 import { requireAuth } from "../middleware/auth";
 import { adminRateLimit } from "../middleware/rateLimit";
-
-const DATA_FILE = "src/data/projects.json";
+import { projectsRepository } from "../db/projectsRepository";
 
 const router = Router();
 
 // GET /api/projects - получить все проекты
-router.get("/", (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
+    const projects = await projectsRepository.getAll();
     res.json(projects);
   } catch (error) {
     res.status(500).json({ error: "Failed to read projects" });
@@ -20,10 +18,9 @@ router.get("/", (req: Request, res: Response) => {
 });
 
 // GET /api/projects/:id - получить проект по ID
-router.get("/:id", (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const projects = readJsonFile<ApiProject[]>(DATA_FILE);
-    const project = projects.find((p) => p.id === req.params.id);
+    const project = await projectsRepository.getById(req.params.id);
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
@@ -39,15 +36,9 @@ router.post(
   adminRateLimit,
   requireAuth,
   validateProject,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
-      const projects = readJsonFile<ApiProject[]>(DATA_FILE);
-      const newProject: ApiProject = {
-        ...req.body,
-        id: Date.now().toString(),
-      };
-      projects.push(newProject);
-      writeJsonFile(DATA_FILE, projects);
+      const newProject = await projectsRepository.create(req.body);
       res.status(201).json(newProject);
     } catch (error) {
       res.status(500).json({ error: "Failed to create project" });
@@ -61,25 +52,19 @@ router.patch(
   adminRateLimit,
   requireAuth,
   validateProject,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
-      const projects = readJsonFile<ApiProject[]>(DATA_FILE);
-      const index = projects.findIndex((p) => p.id === req.params.id);
-      if (index === -1) {
+      const currentProject = await projectsRepository.getById(req.params.id);
+      if (!currentProject) {
         return res.status(404).json({ error: "Project not found" });
       }
-
-      const currentProject = projects[index];
       const updates = req.body;
 
       // Обрабатываем title: если пришла строка, сохраняем структуру { ru, en }
       if (updates.title !== undefined) {
         if (typeof updates.title === "string") {
           // Если текущий title - объект, обновляем оба языка
-          if (
-            typeof currentProject.title === "object" &&
-            currentProject.title !== null
-          ) {
+          if (typeof currentProject.title === "object" && currentProject.title !== null) {
             updates.title = {
               ru: updates.title,
               en: updates.title,
@@ -106,9 +91,14 @@ router.patch(
         }
       }
 
-      projects[index] = { ...currentProject, ...updates, id: req.params.id };
-      writeJsonFile(DATA_FILE, projects);
-      res.json(projects[index]);
+      const updated = await projectsRepository.update(
+        req.params.id,
+        updates as Partial<ApiProject>
+      );
+      if (!updated) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+      res.json(updated);
     } catch (error) {
       res.status(500).json({ error: "Failed to update project" });
     }
@@ -120,14 +110,12 @@ router.delete(
   "/:id",
   adminRateLimit,
   requireAuth,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
-      const projects = readJsonFile<ApiProject[]>(DATA_FILE);
-      const filtered = projects.filter((p) => p.id !== req.params.id);
-      if (filtered.length === projects.length) {
+      const deleted = await projectsRepository.delete(req.params.id);
+      if (!deleted) {
         return res.status(404).json({ error: "Project not found" });
       }
-      writeJsonFile(DATA_FILE, filtered);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete project" });

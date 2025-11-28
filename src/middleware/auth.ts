@@ -1,36 +1,61 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-// Простая базовая аутентификация для админки
-// В продакшене используйте JWT или OAuth
-
+// Для обратной совместимости допускаем статичный токен через заголовок
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!ADMIN_TOKEN) {
-  console.error("ERROR: ADMIN_TOKEN environment variable is not set!");
-  console.error("Please set ADMIN_TOKEN in your environment variables.");
-  console.error("Server will exit for security reasons.");
+if (!JWT_SECRET) {
+  console.error("ERROR: JWT_SECRET is not set. It is required for admin auth.");
   process.exit(1);
 }
+
+type JwtPayload = {
+  sub: string;
+  email: string;
+};
+
+export const issueAuthToken = (email: string): string => {
+  return jwt.sign(
+    {
+      sub: email,
+      email,
+    } as JwtPayload,
+    JWT_SECRET as string,
+    {
+      expiresIn: "7d",
+    }
+  );
+};
 
 export const requireAuth = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // Проверяем только для методов изменения данных (POST, PATCH, DELETE)
-  if (["POST", "PATCH", "DELETE"].includes(req.method)) {
-    const authHeader = req.headers.authorization;
+  const cookieToken = req.cookies?.auth_token as string | undefined;
+  const authHeader = req.headers.authorization;
+  const bearerToken =
+    authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : undefined;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
+  // Предпочитаем JWT из куки
+  const token = cookieToken || bearerToken;
 
-    const token = authHeader.substring(7); // Убираем "Bearer "
-
-    if (token !== ADMIN_TOKEN) {
-      return res.status(403).json({ error: "Invalid token" });
-    }
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
   }
 
-  next();
+  // Сначала пробуем JWT
+  try {
+    jwt.verify(token, JWT_SECRET as string) as JwtPayload;
+    return next();
+  } catch (err) {
+    // Fallback на старый статичный токен, чтобы не ломать существующих клиентов
+    if (ADMIN_TOKEN && token === ADMIN_TOKEN) {
+      return next();
+    }
+    return res.status(403).json({ error: "Invalid token" });
+  }
 };
