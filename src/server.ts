@@ -13,8 +13,8 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 
 const app = express();
 
-// Trust proxy - необходимо для работы rate limiting за прокси (Render, Cloudflare и т.д.)
-app.set("trust proxy", true);
+// Trust first proxy (Render ingress) to keep correct IP for rate limiting
+app.set("trust proxy", 1);
 
 // Security headers
 app.use(helmet());
