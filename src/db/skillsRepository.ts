@@ -10,8 +10,8 @@ import { randomUUID } from "crypto";
 // );
 
 const mapRow = (row: { id: string; data: ApiSkill }): ApiSkill => ({
-  id: row.id,
   ...row.data,
+  id: row.id,
 });
 
 export const skillsRepository = {

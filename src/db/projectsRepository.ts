@@ -11,8 +11,8 @@ import { randomUUID } from "crypto";
 // );
 
 const mapRow = (row: { id: string; data: ApiProject }): ApiProject => ({
-  id: row.id,
   ...row.data,
+  id: row.id,
 });
 
 export const projectsRepository = {
