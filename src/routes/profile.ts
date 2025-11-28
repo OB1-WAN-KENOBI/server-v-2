@@ -18,7 +18,7 @@ const ensureUploadDir = () => {
   }
 };
 
-const savePhotoFromDataUrl = (dataUrl: string): string => {
+const savePhotoFromDataUrl = (dataUrl: string, req: Request): string => {
   const match = dataUrl.match(/^data:image\/(png|jpe?g|webp);base64,(.+)$/i);
   if (!match) {
     throw new Error("Invalid image format");
@@ -34,7 +34,8 @@ const savePhotoFromDataUrl = (dataUrl: string): string => {
   const filepath = path.join(UPLOAD_DIR, filename);
   fs.writeFileSync(filepath, buffer);
 
-  return `/uploads/${filename}`;
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  return `${baseUrl}/uploads/${filename}`;
 };
 
 // GET /api/profile - получить профиль
@@ -72,7 +73,7 @@ router.patch(
 
       try {
         if (photoData && typeof photoData === "string") {
-          photoUrl = savePhotoFromDataUrl(photoData);
+          photoUrl = savePhotoFromDataUrl(photoData, req);
         } else if (safeBody.photoUrl !== undefined) {
           photoUrl =
             typeof safeBody.photoUrl === "string"
