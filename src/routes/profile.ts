@@ -10,7 +10,7 @@ import crypto from "crypto";
 
 const router = Router();
 
-const UPLOAD_DIR = path.join(__dirname, "../../uploads");
+const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
 
 const ensureUploadDir = () => {
   if (!fs.existsSync(UPLOAD_DIR)) {

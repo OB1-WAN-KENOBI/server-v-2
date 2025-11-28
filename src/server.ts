@@ -66,7 +66,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/api", apiRateLimit);
 
 // Раздача загруженных файлов
-const uploadsDir = path.join(__dirname, "../uploads");
+const uploadsDir = path.resolve(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
