@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 const mapRow = (row: { id: string; data: ApiSkill }): ApiSkill => ({
   ...row.data,
   id: row.id,
+  isCore: Boolean(row.data.isCore),
 });
 
 export const skillsRepository = {
@@ -32,7 +33,11 @@ export const skillsRepository = {
 
   async create(payload: Omit<ApiSkill, "id">): Promise<ApiSkill> {
     const id = randomUUID();
-    const data: ApiSkill = { ...payload, id };
+    const data: ApiSkill = {
+      ...payload,
+      id,
+      isCore: Boolean(payload.isCore),
+    };
     await query(
       "INSERT INTO skills (id, data) VALUES ($1, $2::jsonb)",
       [id, data]
@@ -43,7 +48,15 @@ export const skillsRepository = {
   async update(id: string, updates: Partial<ApiSkill>): Promise<ApiSkill | null> {
     const existing = await this.getById(id);
     if (!existing) return null;
-    const merged: ApiSkill = { ...existing, ...updates, id };
+    const merged: ApiSkill = {
+      ...existing,
+      ...updates,
+      id,
+      isCore:
+        updates.isCore !== undefined
+          ? Boolean(updates.isCore)
+          : Boolean(existing.isCore),
+    };
     await query(
       "UPDATE skills SET data = $2::jsonb, updated_at = now() WHERE id = $1",
       [id, merged]

@@ -63,14 +63,19 @@ export const validateSkill = (
 ) => {
   const skill = req.body;
 
-  if (!skill.name || typeof skill.name !== "string") {
+  if (skill.name !== undefined) {
+    if (typeof skill.name !== "string" || skill.name.trim().length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Skill name is required and must be a string" });
+    }
+    // Sanitization
+    skill.name = skill.name.trim().slice(0, 100);
+  } else if (req.method === "POST") {
     return res
       .status(400)
       .json({ error: "Skill name is required and must be a string" });
   }
-
-  // Sanitization
-  skill.name = skill.name.trim().slice(0, 100);
 
   if (
     skill.category &&
@@ -84,6 +89,10 @@ export const validateSkill = (
     !["beginner", "middle", "advanced"].includes(skill.level)
   ) {
     return res.status(400).json({ error: "Invalid skill level" });
+  }
+
+  if (skill.isCore !== undefined && typeof skill.isCore !== "boolean") {
+    return res.status(400).json({ error: "isCore must be a boolean" });
   }
 
   next();

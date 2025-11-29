@@ -22,6 +22,7 @@ export interface ApiSkill {
   name: string;
   category: ApiSkillCategory;
   level: ApiSkillLevel;
+  isCore?: boolean;
 }
 
 export interface ApiStatus {

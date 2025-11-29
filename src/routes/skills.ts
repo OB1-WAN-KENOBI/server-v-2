@@ -54,6 +54,7 @@ router.post(
         name: skillName,
         category: req.body.category || "other",
         level: req.body.level || "middle",
+        isCore: Boolean(req.body.isCore),
       };
 
       const created = await skillsRepository.create(newSkill);
