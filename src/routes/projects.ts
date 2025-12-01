@@ -92,7 +92,10 @@ router.post(
       const body = req.body as Partial<ApiProject> & { imagesData?: string[] };
       const { imagesData, ...safeBody } = body;
 
-      const newProject = await projectsRepository.create(safeBody);
+      // После validateProject все обязательные поля гарантированно присутствуют
+      const newProject = await projectsRepository.create(
+        safeBody as Omit<ApiProject, "id">
+      );
 
       let images: string[] = [];
 
