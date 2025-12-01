@@ -67,8 +67,17 @@ app.use("/api", apiRateLimit);
 
 // Раздача загруженных файлов
 const uploadsDir = path.resolve(process.cwd(), "uploads");
+const profileUploadsDir = path.join(uploadsDir, "profile");
+const projectsUploadsDir = path.join(uploadsDir, "projects");
+
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (!fs.existsSync(profileUploadsDir)) {
+  fs.mkdirSync(profileUploadsDir, { recursive: true });
+}
+if (!fs.existsSync(projectsUploadsDir)) {
+  fs.mkdirSync(projectsUploadsDir, { recursive: true });
 }
 app.use("/uploads", express.static(uploadsDir));
 

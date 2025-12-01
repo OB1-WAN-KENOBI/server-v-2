@@ -10,7 +10,7 @@ import crypto from "crypto";
 
 const router = Router();
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
+const UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "profile");
 
 const ensureUploadDir = () => {
   if (!fs.existsSync(UPLOAD_DIR)) {
@@ -23,7 +23,8 @@ const savePhotoFromDataUrl = (dataUrl: string, req: Request): string => {
   if (!match) {
     throw new Error("Invalid image format");
   }
-  const ext = match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
+  const ext =
+    match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
   const buffer = Buffer.from(match[2], "base64");
   if (buffer.length > 5 * 1024 * 1024) {
     throw new Error("Image is too large (max 5MB)");
@@ -35,7 +36,7 @@ const savePhotoFromDataUrl = (dataUrl: string, req: Request): string => {
   fs.writeFileSync(filepath, buffer);
 
   const baseUrl = `${req.protocol}://${req.get("host")}`;
-  return `${baseUrl}/uploads/${filename}`;
+  return `${baseUrl}/uploads/profile/${filename}`;
 };
 
 // GET /api/profile - получить профиль

@@ -4,8 +4,59 @@ import { validateProject } from "../middleware/validation";
 import { requireAuth } from "../middleware/auth";
 import { adminRateLimit } from "../middleware/rateLimit";
 import { projectsRepository } from "../db/projectsRepository";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
 const router = Router();
+
+const UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "projects");
+
+const ensureUploadDir = () => {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+};
+
+const saveImageFromDataUrl = (
+  dataUrl: string,
+  projectId: string,
+  req: Request
+): string => {
+  const match = dataUrl.match(/^data:image\/(png|jpe?g|webp);base64,(.+)$/i);
+  if (!match) {
+    throw new Error("Invalid image format");
+  }
+  const ext =
+    match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
+  const buffer = Buffer.from(match[2], "base64");
+  if (buffer.length > 5 * 1024 * 1024) {
+    throw new Error("Image is too large (max 5MB)");
+  }
+
+  ensureUploadDir();
+  const filename = `project-${projectId}-${Date.now()}-${crypto.randomUUID()}.${ext}`;
+  const filepath = path.join(UPLOAD_DIR, filename);
+  fs.writeFileSync(filepath, buffer);
+
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  return `${baseUrl}/uploads/projects/${filename}`;
+};
+
+const deleteImageFile = (imageUrl: string): void => {
+  try {
+    if (!imageUrl || !imageUrl.includes("/uploads/projects/")) {
+      return;
+    }
+    const filename = path.basename(imageUrl);
+    const filepath = path.join(UPLOAD_DIR, filename);
+    if (fs.existsSync(filepath)) {
+      fs.unlinkSync(filepath);
+    }
+  } catch (error) {
+    console.error("Failed to delete image file:", error);
+  }
+};
 
 // GET /api/projects - получить все проекты
 router.get("/", async (req: Request, res: Response) => {
@@ -38,7 +89,36 @@ router.post(
   validateProject,
   async (req: Request, res: Response) => {
     try {
-      const newProject = await projectsRepository.create(req.body);
+      const body = req.body as Partial<ApiProject> & { imagesData?: string[] };
+      const { imagesData, ...safeBody } = body;
+
+      const newProject = await projectsRepository.create(safeBody);
+
+      let images: string[] = [];
+
+      if (imagesData && Array.isArray(imagesData)) {
+        try {
+          images = imagesData
+            .filter((dataUrl): dataUrl is string => typeof dataUrl === "string")
+            .map((dataUrl) =>
+              saveImageFromDataUrl(dataUrl, newProject.id, req)
+            );
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Failed to upload images";
+          return res.status(400).json({ error: message });
+        }
+      }
+
+      if (images.length > 0) {
+        const updatedProject = await projectsRepository.update(newProject.id, {
+          images,
+        });
+        if (updatedProject) {
+          return res.status(201).json(updatedProject);
+        }
+      }
+
       res.status(201).json(newProject);
     } catch (error) {
       res.status(500).json({ error: "Failed to create project" });
@@ -58,13 +138,19 @@ router.patch(
       if (!currentProject) {
         return res.status(404).json({ error: "Project not found" });
       }
-      const updates = req.body;
+
+      const body = req.body as Partial<ApiProject> & { imagesData?: string[] };
+      const { imagesData, ...safeBody } = body;
+      const updates = safeBody;
 
       // Обрабатываем title: если пришла строка, сохраняем структуру { ru, en }
       if (updates.title !== undefined) {
         if (typeof updates.title === "string") {
           // Если текущий title - объект, обновляем оба языка
-          if (typeof currentProject.title === "object" && currentProject.title !== null) {
+          if (
+            typeof currentProject.title === "object" &&
+            currentProject.title !== null
+          ) {
             updates.title = {
               ru: updates.title,
               en: updates.title,
@@ -91,6 +177,36 @@ router.patch(
         }
       }
 
+      // Обрабатываем загрузку новых изображений
+      if (imagesData && Array.isArray(imagesData)) {
+        try {
+          const newImages = imagesData
+            .filter((dataUrl): dataUrl is string => typeof dataUrl === "string")
+            .map((dataUrl) =>
+              saveImageFromDataUrl(dataUrl, req.params.id, req)
+            );
+
+          const existingImages = currentProject.images || [];
+          updates.images = [...existingImages, ...newImages];
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Failed to upload images";
+          return res.status(400).json({ error: message });
+        }
+      }
+
+      // Если передали массив images напрямую (для удаления или замены)
+      if (updates.images !== undefined && !imagesData) {
+        const oldImages = currentProject.images || [];
+        const newImages = updates.images || [];
+        // Удаляем файлы, которых больше нет в новом списке
+        oldImages.forEach((oldUrl) => {
+          if (!newImages.includes(oldUrl)) {
+            deleteImageFile(oldUrl);
+          }
+        });
+      }
+
       const updated = await projectsRepository.update(
         req.params.id,
         updates as Partial<ApiProject>
@@ -112,6 +228,15 @@ router.delete(
   requireAuth,
   async (req: Request, res: Response) => {
     try {
+      const project = await projectsRepository.getById(req.params.id);
+      if (project) {
+        // Удаляем все изображения проекта
+        const images = project.images || [];
+        images.forEach((imageUrl) => {
+          deleteImageFile(imageUrl);
+        });
+      }
+
       const deleted = await projectsRepository.delete(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Project not found" });
