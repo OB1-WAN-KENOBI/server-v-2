@@ -152,20 +152,47 @@ router.patch(
         }
       }
 
-      // Обрабатываем загрузку новых изображений
+      // Обрабатываем изображения
+      // Если передали imagesData - это новые изображения для добавления
       if (imagesData && Array.isArray(imagesData)) {
         try {
           const newImages = imagesData
             .filter((dataUrl): dataUrl is string => typeof dataUrl === "string")
             .map((dataUrl) => validateAndNormalizeDataUrl(dataUrl));
 
-          const existingImages = currentProject.images || [];
-          updates.images = [...existingImages, ...newImages];
+          // Если передали images - используем их как базовый список (пользователь мог удалить некоторые)
+          // Иначе берем из текущего проекта
+          const baseImages =
+            updates.images !== undefined
+              ? Array.isArray(updates.images)
+                ? updates.images
+                : []
+              : currentProject.images || [];
+
+          // Убираем дубликаты (на случай если одно и то же изображение уже есть)
+          const allImages = [...baseImages, ...newImages];
+          const uniqueImages = Array.from(new Set(allImages));
+
+          if (allImages.length !== uniqueImages.length) {
+            console.warn(
+              `Project ${req.params.id}: Removed ${
+                allImages.length - uniqueImages.length
+              } duplicate images`
+            );
+          }
+
+          updates.images = uniqueImages;
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Failed to upload images";
           return res.status(400).json({ error: message });
         }
+      }
+      // Если передали только images без imagesData - это финальный список (пользователь удалил/изменил)
+      else if (updates.images !== undefined) {
+        // Убираем дубликаты
+        const imagesArray = Array.isArray(updates.images) ? updates.images : [];
+        updates.images = Array.from(new Set(imagesArray));
       }
 
       const updated = await projectsRepository.update(
