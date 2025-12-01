@@ -79,7 +79,35 @@ if (!fs.existsSync(profileUploadsDir)) {
 if (!fs.existsSync(projectsUploadsDir)) {
   fs.mkdirSync(projectsUploadsDir, { recursive: true });
 }
-app.use("/uploads", express.static(uploadsDir));
+// Раздача статических файлов с CORS заголовками
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    const origin = req.headers.origin;
+    const corsOrigin = getCorsOrigin();
+
+    // Проверяем, разрешен ли origin
+    if (origin) {
+      if (corsOrigin === "*" || corsOrigin === true) {
+        res.header("Access-Control-Allow-Origin", "*");
+      } else if (Array.isArray(corsOrigin)) {
+        if (corsOrigin.includes(origin)) {
+          res.header("Access-Control-Allow-Origin", origin);
+        }
+      } else if (corsOrigin === origin) {
+        res.header("Access-Control-Allow-Origin", origin);
+      }
+    } else if (corsOrigin === "*" || corsOrigin === true) {
+      res.header("Access-Control-Allow-Origin", "*");
+    } else if (typeof corsOrigin === "string") {
+      res.header("Access-Control-Allow-Origin", corsOrigin);
+    }
+
+    res.header("Access-Control-Allow-Credentials", "true");
+    next();
+  },
+  express.static(uploadsDir)
+);
 
 // Роуты
 app.use("/api/projects", projectsRouter);
