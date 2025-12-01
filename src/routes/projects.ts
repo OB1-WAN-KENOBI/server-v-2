@@ -24,6 +24,18 @@ const validateAndNormalizeDataUrl = (dataUrl: string): string => {
 router.get("/", async (req: Request, res: Response) => {
   try {
     const projects = await projectsRepository.getAll();
+    // Логируем для отладки (можно убрать в production)
+    if (process.env.NODE_ENV !== "production") {
+      projects.forEach((p) => {
+        if (p.images && p.images.length > 0) {
+          console.log(
+            `Project ${p.id}: ${p.images.length} images, first image length: ${
+              p.images[0]?.length || 0
+            }`
+          );
+        }
+      });
+    }
     res.json(projects);
   } catch (error) {
     res.status(500).json({ error: "Failed to read projects" });

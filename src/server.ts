@@ -63,9 +63,9 @@ app.use(
   })
 );
 
-// Body parser с лимитом размера
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+// Body parser с лимитом размера (увеличено для base64 изображений)
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Rate limiting для всего API
 app.use("/api", apiRateLimit);
