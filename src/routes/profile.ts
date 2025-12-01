@@ -4,39 +4,20 @@ import { validateProfile } from "../middleware/validation";
 import { requireAuth } from "../middleware/auth";
 import { adminRateLimit } from "../middleware/rateLimit";
 import { profileRepository } from "../db/profileRepository";
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
 
 const router = Router();
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "profile");
-
-const ensureUploadDir = () => {
-  if (!fs.existsSync(UPLOAD_DIR)) {
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-  }
-};
-
-const savePhotoFromDataUrl = (dataUrl: string, req: Request): string => {
+const validateAndNormalizeDataUrl = (dataUrl: string): string => {
   const match = dataUrl.match(/^data:image\/(png|jpe?g|webp);base64,(.+)$/i);
   if (!match) {
     throw new Error("Invalid image format");
   }
-  const ext =
-    match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
   const buffer = Buffer.from(match[2], "base64");
   if (buffer.length > 5 * 1024 * 1024) {
     throw new Error("Image is too large (max 5MB)");
   }
-
-  ensureUploadDir();
-  const filename = `profile-${Date.now()}-${crypto.randomUUID()}.${ext}`;
-  const filepath = path.join(UPLOAD_DIR, filename);
-  fs.writeFileSync(filepath, buffer);
-
-  // Возвращаем относительный путь, фронтенд сам нормализует его
-  return `/uploads/profile/${filename}`;
+  // Возвращаем data URL как есть - будем хранить в БД
+  return dataUrl;
 };
 
 // GET /api/profile - получить профиль
@@ -74,7 +55,7 @@ router.patch(
 
       try {
         if (photoData && typeof photoData === "string") {
-          photoUrl = savePhotoFromDataUrl(photoData, req);
+          photoUrl = validateAndNormalizeDataUrl(photoData);
         } else if (safeBody.photoUrl !== undefined) {
           photoUrl =
             typeof safeBody.photoUrl === "string"

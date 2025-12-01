@@ -4,58 +4,20 @@ import { validateProject } from "../middleware/validation";
 import { requireAuth } from "../middleware/auth";
 import { adminRateLimit } from "../middleware/rateLimit";
 import { projectsRepository } from "../db/projectsRepository";
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
 
 const router = Router();
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "projects");
-
-const ensureUploadDir = () => {
-  if (!fs.existsSync(UPLOAD_DIR)) {
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-  }
-};
-
-const saveImageFromDataUrl = (
-  dataUrl: string,
-  projectId: string,
-  req: Request
-): string => {
+const validateAndNormalizeDataUrl = (dataUrl: string): string => {
   const match = dataUrl.match(/^data:image\/(png|jpe?g|webp);base64,(.+)$/i);
   if (!match) {
     throw new Error("Invalid image format");
   }
-  const ext =
-    match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
   const buffer = Buffer.from(match[2], "base64");
   if (buffer.length > 5 * 1024 * 1024) {
     throw new Error("Image is too large (max 5MB)");
   }
-
-  ensureUploadDir();
-  const filename = `project-${projectId}-${Date.now()}-${crypto.randomUUID()}.${ext}`;
-  const filepath = path.join(UPLOAD_DIR, filename);
-  fs.writeFileSync(filepath, buffer);
-
-  // Возвращаем относительный путь, фронтенд сам нормализует его
-  return `/uploads/projects/${filename}`;
-};
-
-const deleteImageFile = (imageUrl: string): void => {
-  try {
-    if (!imageUrl || !imageUrl.includes("/uploads/projects/")) {
-      return;
-    }
-    const filename = path.basename(imageUrl);
-    const filepath = path.join(UPLOAD_DIR, filename);
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
-    }
-  } catch (error) {
-    console.error("Failed to delete image file:", error);
-  }
+  // Возвращаем data URL как есть - будем хранить в БД
+  return dataUrl;
 };
 
 // GET /api/projects - получить все проекты
@@ -103,9 +65,7 @@ router.post(
         try {
           images = imagesData
             .filter((dataUrl): dataUrl is string => typeof dataUrl === "string")
-            .map((dataUrl) =>
-              saveImageFromDataUrl(dataUrl, newProject.id, req)
-            );
+            .map((dataUrl) => validateAndNormalizeDataUrl(dataUrl));
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Failed to upload images";
@@ -185,9 +145,7 @@ router.patch(
         try {
           const newImages = imagesData
             .filter((dataUrl): dataUrl is string => typeof dataUrl === "string")
-            .map((dataUrl) =>
-              saveImageFromDataUrl(dataUrl, req.params.id, req)
-            );
+            .map((dataUrl) => validateAndNormalizeDataUrl(dataUrl));
 
           const existingImages = currentProject.images || [];
           updates.images = [...existingImages, ...newImages];
@@ -196,18 +154,6 @@ router.patch(
             error instanceof Error ? error.message : "Failed to upload images";
           return res.status(400).json({ error: message });
         }
-      }
-
-      // Если передали массив images напрямую (для удаления или замены)
-      if (updates.images !== undefined && !imagesData) {
-        const oldImages = currentProject.images || [];
-        const newImages = updates.images || [];
-        // Удаляем файлы, которых больше нет в новом списке
-        oldImages.forEach((oldUrl) => {
-          if (!newImages.includes(oldUrl)) {
-            deleteImageFile(oldUrl);
-          }
-        });
       }
 
       const updated = await projectsRepository.update(
@@ -231,15 +177,6 @@ router.delete(
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const project = await projectsRepository.getById(req.params.id);
-      if (project) {
-        // Удаляем все изображения проекта
-        const images = project.images || [];
-        images.forEach((imageUrl) => {
-          deleteImageFile(imageUrl);
-        });
-      }
-
       const deleted = await projectsRepository.delete(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Project not found" });
