@@ -35,8 +35,8 @@ const savePhotoFromDataUrl = (dataUrl: string, req: Request): string => {
   const filepath = path.join(UPLOAD_DIR, filename);
   fs.writeFileSync(filepath, buffer);
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-  return `${baseUrl}/uploads/profile/${filename}`;
+  // Возвращаем относительный путь, фронтенд сам нормализует его
+  return `/uploads/profile/${filename}`;
 };
 
 // GET /api/profile - получить профиль

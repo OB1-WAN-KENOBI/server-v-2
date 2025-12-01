@@ -39,8 +39,8 @@ const saveImageFromDataUrl = (
   const filepath = path.join(UPLOAD_DIR, filename);
   fs.writeFileSync(filepath, buffer);
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-  return `${baseUrl}/uploads/projects/${filename}`;
+  // Возвращаем относительный путь, фронтенд сам нормализует его
+  return `/uploads/projects/${filename}`;
 };
 
 const deleteImageFile = (imageUrl: string): void => {

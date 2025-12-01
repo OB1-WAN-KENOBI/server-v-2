@@ -19,7 +19,12 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Security headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(cookieParser());
 
 // CORS настройки
@@ -86,27 +91,44 @@ app.use(
     const origin = req.headers.origin;
     const corsOrigin = getCorsOrigin();
 
-    // Проверяем, разрешен ли origin
+    // Устанавливаем CORS заголовки
     if (origin) {
       if (corsOrigin === "*" || corsOrigin === true) {
         res.header("Access-Control-Allow-Origin", "*");
       } else if (Array.isArray(corsOrigin)) {
         if (corsOrigin.includes(origin)) {
           res.header("Access-Control-Allow-Origin", origin);
+          res.header("Access-Control-Allow-Credentials", "true");
         }
-      } else if (corsOrigin === origin) {
+      } else if (typeof corsOrigin === "string" && corsOrigin === origin) {
         res.header("Access-Control-Allow-Origin", origin);
+        res.header("Access-Control-Allow-Credentials", "true");
       }
-    } else if (corsOrigin === "*" || corsOrigin === true) {
-      res.header("Access-Control-Allow-Origin", "*");
-    } else if (typeof corsOrigin === "string") {
-      res.header("Access-Control-Allow-Origin", corsOrigin);
+    } else {
+      if (corsOrigin === "*" || corsOrigin === true) {
+        res.header("Access-Control-Allow-Origin", "*");
+      } else if (typeof corsOrigin === "string") {
+        res.header("Access-Control-Allow-Origin", corsOrigin);
+        res.header("Access-Control-Allow-Credentials", "true");
+      }
     }
 
-    res.header("Access-Control-Allow-Credentials", "true");
+    // Дополнительные заголовки для статических файлов
+    res.header("Cross-Origin-Resource-Policy", "cross-origin");
+    res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
+
     next();
   },
-  express.static(uploadsDir)
+  express.static(uploadsDir, {
+    setHeaders: (res, path) => {
+      res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  })
 );
 
 // Роуты
